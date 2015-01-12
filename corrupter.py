@@ -40,12 +40,14 @@ class Corrupter:
             num = int.from_bytes(byte, sys.byteorder)
             if edit:
                 # Slightly change the value of the byte by a random amount
-                corrupt_byte = max(32, (num + random.randint(-1, 1)) % MAX_BYTE_VAL)
+                corrupt_byte = max(32, (num + random.randint(-3, 3)) % MAX_BYTE_VAL)
             else:
                 corrupt_byte = num
 
-            # Write to the corrupted file
-            img_corrupt.write(bytes([corrupt_byte]))
+            # 1% chance to skip the byte
+            if pos < self.coffset or random.random() > 0.0:
+                # Write to the corrupted file
+                img_corrupt.write(bytes([corrupt_byte]))
 
             # Continue reading image file
             pos += 1
