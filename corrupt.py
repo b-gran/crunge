@@ -4,7 +4,7 @@ import random
 MAX_BYTE_VAL = 255
 
 
-class Corrupter:
+class Corruption:
     count = 0
 
     def __init__(self, cfilename, ctype, coffset, clength, cperiod):

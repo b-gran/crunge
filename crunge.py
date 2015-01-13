@@ -1,4 +1,4 @@
-import corrupter
+import corrupt
 import getopt
 
 from tkinter import *
@@ -14,7 +14,6 @@ MAX_BYTE_VAL = 255
 
 
 class MainWindow:
-
     def __init__(self, filename=None):
         self.root = Tk()
         self.root.title("Corrupt an image")
@@ -54,7 +53,7 @@ class MainWindow:
         # Add the entry
         ttk.Entry(self.mainframe, width=7, textvariable=var, justify=CENTER).grid(column=c, row=r, sticky=E)
         # Add the label
-        ttk.Label(self.mainframe, text=label_text).grid(column=(c+1), row=r, stick=W)
+        ttk.Label(self.mainframe, text=label_text).grid(column=(c + 1), row=r, stick=W)
 
     def run(self):
         # Length, offset, period parameters (row 1)
@@ -83,18 +82,24 @@ class MainWindow:
         self.root.mainloop()
 
     def generate(self):
+        """
+        Generate corrupted files based on the supplied parameters.
+        :return:
+        """
         if self.get_filename() != "":
-            c = corrupter.Corrupter(self.get_filename(), 'standard', self.get_offset(), self.get_length(),
-                                    self.get_period())
-            names = [c.run() for i in range(0, self.get_num_outputs())]
-            print(names)
-
+            c = corrupt.Corruption(self.get_filename(), 'standard', self.get_offset(), self.get_length(),
+                                   self.get_period())
+            corrupted_filenames = [c.run() for i in range(0, self.get_num_outputs())]
+            
+            print("===== Corrupted files =====")
+            for f in corrupted_filenames:
+                print(f)
 
 def main(argv):
     try:
         opts, args = getopt.getopt(argv, "")
     except getopt.GetoptError:
-        print('corruptize.py filename')
+        print('crunge.py filename')
         sys.exit(2)
 
     # Pass the image path if provided
