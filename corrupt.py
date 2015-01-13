@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+
 MAX_BYTE_VAL = 255
 
 

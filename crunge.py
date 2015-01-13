@@ -1,33 +1,35 @@
 import corrupt
 import getopt
+import json
 
 from tkinter import *
 from tkinter import ttk
 
 
-DEFAULT_CORRUPTION = 'standard'
-DEFAULT_OFFSET = 2 * 1024
-DEFAULT_LENGTH = 2
-DEFAULT_PERIOD = 1024
-DEFAULT_OUTPUTS = 1
-MAX_BYTE_VAL = 255
-
-
 class MainWindow:
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, conf=None):
+        if conf:
+            self.conf = conf
+
+        # Initialize the container
         self.root = Tk()
         self.root.title("Corrupt an image")
-
         self.mainframe = ttk.Frame(self.root, padding="3 3 12 12")
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.rowconfigure(0, weight=1)
-
         self.output_slider = None
 
-        self.length = IntVar(value=DEFAULT_LENGTH)
-        self.offset = IntVar(value=DEFAULT_OFFSET)
-        self.period = IntVar(value=DEFAULT_PERIOD)
+        # Load defaults
+        if self.conf:
+            defaults = self.conf["defaults"]
+            self.length = IntVar(value=defaults["length"])
+            self.offset = IntVar(value=defaults["offset"])
+            self.period = IntVar(value=defaults["period"])
+        else:
+            self.length = IntVar()
+            self.offset = IntVar()
+            self.period = IntVar()
         self.filename = StringVar(value=filename) if filename else StringVar()
 
 
@@ -61,22 +63,25 @@ class MainWindow:
         self.add_num_entry(self.offset, 3, 1, "offset (in bytes)")
         self.add_num_entry(self.period, 5, 1, "period (in bytes)")
 
-        # Filename, output count (row 2)
+        # Filename (row 2)
         filename_entry = ttk.Entry(self.mainframe, width=20, textvariable=self.filename)
         filename_entry.grid(column=1, row=2, columnspan=2, sticky=E)
         ttk.Label(self.mainframe, text="filename").grid(column=3, row=2, sticky=W)
 
+        # Output count (row 2)
         self.output_slider = Scale(self.mainframe, from_=0, to=100, length=150, orient=HORIZONTAL)
         self.output_slider.grid(column=4, row=2, columnspan=2, sticky=E)
-        self.output_slider.set(DEFAULT_OUTPUTS)
+        self.output_slider.set(self.conf["defaults"]["output_count"] if self.conf else 1)
         ttk.Label(self.mainframe, text="number of corrupted outputs").grid(column=6, row=2, sticky=W)
         self.output_slider.pack()
 
+        # Generate button (row 3)
         ttk.Button(self.mainframe, text="Generate", command=self.generate).grid(column=6, row=3, sticky=E)
 
-        for child in self.mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
+        # Configure grid.
+        for child in self.mainframe.winfo_children():
+            child.grid_configure(padx=5, pady=5)
 
-        # offset_entry.focus()
         self.root.bind('<Return>', self.generate)
 
         self.root.mainloop()
@@ -84,16 +89,33 @@ class MainWindow:
     def generate(self):
         """
         Generate corrupted files based on the supplied parameters.
-        :return:
         """
         if self.get_filename() != "":
             c = corrupt.Corruption(self.get_filename(), 'standard', self.get_offset(), self.get_length(),
                                    self.get_period())
             corrupted_filenames = [c.run() for i in range(0, self.get_num_outputs())]
-            
+
             print("===== Corrupted files =====")
             for f in corrupted_filenames:
                 print(f)
+
+
+def load_conf():
+    """
+    Attempt to load a configuration file. Returns None if no configuration file is found.
+    """
+    try:
+        conf = open(".conf")
+        conf_json = json.load(conf)
+    except IOError:
+        print("No configuration file found.")
+        return None
+    except ValueError:
+        print("Your configuration file is malformed.")
+        return None
+    else:
+        return conf_json
+
 
 def main(argv):
     try:
@@ -102,11 +124,11 @@ def main(argv):
         print('crunge.py filename')
         sys.exit(2)
 
-    # Pass the image path if provided
-    if len(args) == 1:
-        gui = MainWindow(args[0])
-    else:
-        gui = MainWindow()
+    # Initialize the window with the image path and configuration file is provided.
+    imgpath = args[0] if len(args) == 1 else None
+    conf = load_conf()
+    gui = MainWindow(imgpath, conf)
+
     gui.run()
 
 
