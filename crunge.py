@@ -33,6 +33,8 @@ class MainWindow:
             self.period = IntVar()
         self.filename = StringVar(value=filename) if filename else StringVar()
 
+        self.corrupter = None
+
 
     def get_length(self):
         return self.length.get()
@@ -102,9 +104,13 @@ class MainWindow:
         Generate corrupted files based on the supplied parameters.
         """
         if self.get_filename() != "":
-            c = corrupt.Corruption(self.get_filename(), self.get_corruption_type(), self.get_offset(), self.get_length(),
-                                   self.get_period())
-            corrupted_filenames = [c.run() for i in range(0, self.get_num_outputs())]
+            flag_run = False
+            params = self.get_filename(), self.get_corruption_type(), self.get_offset(), self.get_length(), \
+                     self.get_period()
+            if not self.corrupter or (self.corrupter and not params == self.corrupter.params()):
+                self.corrupter = corrupt.Corruption(params[0], params[1], params[2], params[3], params[4])
+
+            corrupted_filenames = [self.corrupter.run() for i in range(0, self.get_num_outputs())]
 
             print("===== Corrupted files =====")
             for f in corrupted_filenames:
