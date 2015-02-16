@@ -19,6 +19,7 @@ class MainWindow:
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.rowconfigure(0, weight=1)
         self.output_slider = None
+        self.corruption_listbox = None
 
         # Load defaults
         if self.conf:
@@ -44,6 +45,9 @@ class MainWindow:
 
     def get_filename(self):
         return self.filename.get()
+
+    def get_corruption_type(self):
+        return self.corruption_listbox.get(ACTIVE)
 
     def get_num_outputs(self):
         return self.output_slider.get()
@@ -75,6 +79,13 @@ class MainWindow:
         ttk.Label(self.mainframe, text="number of corrupted outputs").grid(column=6, row=2, sticky=W)
         self.output_slider.pack()
 
+        # Corruption type (row 3)
+        self.corruption_listbox = Listbox(self.mainframe, height=len(corrupt.CORRUPTION_TYPES))
+        self.corruption_listbox.grid(column=1, row=3, sticky=W)
+        for item in corrupt.CORRUPTION_TYPES:
+            self.corruption_listbox.insert(END, item)
+        self.corruption_listbox.pack()
+
         # Generate button (row 3)
         ttk.Button(self.mainframe, text="Generate", command=self.generate).grid(column=6, row=3, sticky=E)
 
@@ -91,7 +102,7 @@ class MainWindow:
         Generate corrupted files based on the supplied parameters.
         """
         if self.get_filename() != "":
-            c = corrupt.Corruption(self.get_filename(), 'standard', self.get_offset(), self.get_length(),
+            c = corrupt.Corruption(self.get_filename(), self.get_corruption_type(), self.get_offset(), self.get_length(),
                                    self.get_period())
             corrupted_filenames = [c.run() for i in range(0, self.get_num_outputs())]
 
@@ -124,7 +135,7 @@ def main(argv):
         print('crunge.py filename')
         sys.exit(2)
 
-    # Initialize the window with the image path and configuration file is provided.
+    # Initialize the window with the image path and configuration file if provided.
     imgpath = args[0] if len(args) == 1 else None
     conf = load_conf()
     gui = MainWindow(imgpath, conf)
