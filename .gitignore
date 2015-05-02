@@ -1,4 +1,2 @@
-.idea/*
+# OS X files
 .DS_Store
-images/*
-__pycache__/*
