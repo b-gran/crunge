@@ -1,8 +1,9 @@
-# node modules
-node_modules/*
-
-# bower files
-public/components/*
-
 # IDE files
-.idea/*
+.idea/
+
+# Generate files (npm, bower)
+node_modules/
+public/bower
+
+# SASS intermediates
+.sass-cache

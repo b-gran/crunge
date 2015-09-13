@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AACE,MAAE;EACA,MAAM,EAAE,IAAI;EACZ,OAAO,EAAE,IAAI;AAGf,MAAE;EACA,KAAK,EAAE,KAAK;EACZ,OAAO,EAAE,YAAY;EACrB,KAAK,EAAE,IAAI;EACX,gBAAgB,EAAE,IAAI",
+"sources": ["../scss/crunge.scss"],
+"names": [],
+"file": "crunge.css"
+}
