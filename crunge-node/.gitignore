@@ -1,0 +1,11 @@
+# images
+*.jpg
+
+# demo data folder
+demo/
+
+# IDE stuff
+.idea/
+
+# npm
+node_modules/
