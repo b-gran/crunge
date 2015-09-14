@@ -1,8 +1,6 @@
 var _ = require('underscore');
 
 var resolveJPEGMarker = function (marker) {
-    var appN = 0;
-    var rstN = 0;
     switch (marker) {
         // Not a marker
         case (0x0):
@@ -37,34 +35,34 @@ var resolveJPEGMarker = function (marker) {
             return 'SOS';
 
         // RSTn
-        case (0xD7): rstN++;
-        case (0xD6): rstN++;
-        case (0xD5): rstN++;
-        case (0xD4): rstN++;
-        case (0xD3): rstN++;
-        case (0xD2): rstN++;
-        case (0xD1): rstN++;
+        case (0xD7):
+        case (0xD6):
+        case (0xD5):
+        case (0xD4):
+        case (0xD3):
+        case (0xD2):
+        case (0xD1):
         case (0xD0):
-            return 'RST' + rstN;
+            return 'RST' + (marker & 0x0F).toString(16);
 
         // APPn
-        case (0xEF): appN++;
-        case (0xEE): appN++;
-        case (0xED): appN++;
-        case (0xEC): appN++;
-        case (0xEB): appN++;
-        case (0xEA): appN++;
-        case (0xE9): appN++;
-        case (0xE8): appN++;
-        case (0xE7): appN++;
-        case (0xE6): appN++;
-        case (0xE5): appN++;
-        case (0xE4): appN++;
-        case (0xE3): appN++;
-        case (0xE2): appN++;
-        case (0xE1): appN++;
+        case (0xEF):
+        case (0xEE):
+        case (0xED):
+        case (0xEC):
+        case (0xEB):
+        case (0xEA):
+        case (0xE9):
+        case (0xE8):
+        case (0xE7):
+        case (0xE6):
+        case (0xE5):
+        case (0xE4):
+        case (0xE3):
+        case (0xE2):
+        case (0xE1):
         case (0xE0):
-            return 'APP' + appN;
+            return 'APP' + (marker & 0x0F).toString(16);
 
         // COM
         case (0xFE):
@@ -73,6 +71,10 @@ var resolveJPEGMarker = function (marker) {
         // EOI
         case (0xD9):
             return 'EOI';
+
+        // Padding
+        default:
+            return null;
     }
 };
 
@@ -137,6 +139,10 @@ var parseRegions = function (buffer) {
     return [ regions, keyedRegions ];
 };
 
+var mod = function (number, n) {
+    return ((number % n) + n) % n;
+}
+
 var algorithms = {
 
     // Adds random noise to each byte, modulo the maximum byte val.
@@ -145,6 +151,138 @@ var algorithms = {
         return (byte + (Math.random() * 255 | 0)) % 255;
     },
 
+    lessnoise: function (byte) {
+        return (byte + (Math.random() * 10 | 0)) % 255;
+    },
+
+    probabilistic: (function () {
+        var states = [0.01, 0.0001, 0.001];
+        var pos = 0;
+
+        return function (byte) {
+            if (Math.random() > 0.999)
+                pos = (pos + 1) % states.length;
+
+            if (Math.random() > (1 - states[pos])) {
+                return mod((byte + (Math.random() * 20 | 0) - 10), 255);
+            } else
+                return byte;
+        };
+    })(),
+
+    sinusoidal: (function () {
+        var step = 2 * Math.PI / 1000;
+        var phi = Math.random() * Math.PI * 2;
+
+        var t = 0;
+
+        return function (byte) {
+            var val = mod((byte + 1 * Math.sin(phi + t)) | 0, 255);
+            t += step;
+            return val;
+        };
+    })(),
+
+    chunks: (function () {
+        var chunkSize = 4;
+        var pos = 0;
+        var active = false;
+
+        return function (byte) {
+            if ((active && pos == 0) || (!active && Math.random() > 0.999))
+                active = !active;
+
+            if (active) {
+                pos = (pos + 1) % chunkSize;
+                return mod((byte + (Math.random() * 2 | 0) - 1), 255);
+            }
+
+            return byte;
+        };
+    })(),
+
+    padding: (function () {
+        var padVal = 0x60;
+
+        var chunkSize = 128;
+        var pos = 0;
+        var active = false;
+
+        return function (byte) {
+            if ((active && pos == 0) || (!active && Math.random() > 0.9995))
+                active = !active;
+
+            if (active) {
+                pos = (pos + 1) % chunkSize;
+                return padVal;
+            }
+
+            return byte;
+        };
+    })(),
+
+    counter: (function () {
+        var chunkSize = 128;
+        var pos = 0;
+        var active = false;
+
+        return function (byte) {
+            if ((active && pos == 0) || (!active && Math.random() > 0.9995))
+                active = !active;
+
+            if (active) {
+                pos = (pos + 1) % chunkSize;
+
+                var arccos = Math.acos((byte - 128) / 128);
+                var byteProj = arccos * (254 / Math.PI);
+
+                return mod(byteProj, 255);
+            }
+
+            return byte;
+        };
+    })(),
+
+    sinusoidal_weird: (function () {
+        var offset = Math.random() - 0.25;
+
+        return function (byte) {
+            // Maps byte to interval [-1, 1) (approximately)
+            var arccos = Math.acos((offset + (byte - 128) / 128) % 2);
+
+            // Maps the arccos function to the interval [0, 254]
+            var byteProj = arccos * (254 / Math.PI);
+
+            return mod(byteProj, 255);
+        };
+    })(),
+
+    sinusoidal_weird_sin: (function () {
+        var offset = Math.random() - 0.25;
+
+        return function (byte) {
+            // Maps byte to interval [-1, 1) (approximately)
+            var arcsin = Math.asin((offset + (byte - 128) / 128) % 2);
+
+            // Maps the arcsin function to the interval [0, 254]
+            var byteProj = arcsin * (254 / Math.PI);
+
+            return mod(byteProj, 255);
+        };
+    })(),
+
+    sinusoidal_weird_tan: (function () {
+        var offset = Math.random() * 254 | 0;
+
+        return function (byte) {
+            var arctan = Math.atan((offset + byte) % 254);
+
+            // Maps the arctan function to the interval [0, 254]
+            var byteProj = (arctan + Math.PI / 2) * (254 / Math.PI);
+
+            return mod(byteProj, 128);
+        };
+    })(),
 };
 
 /*
