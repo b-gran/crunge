@@ -1,0 +1,9 @@
+{
+  "name": "crunge-node",
+  "version": "1.0.0",
+  "dependencies": {
+    "commander": "^2.8.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {}
+}
