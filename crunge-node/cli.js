@@ -14,12 +14,17 @@ var cl = require('commander')
     .usage('input_file [options]')
 
     .option('-a, --algorithm [algorithm]', 'The corruption algorithm to use [noise]', 'noise')
+    .option('-p, --params [params]', 'Optional parameters for the algorithm in the form p0,p1,...,pn')
     .option('-o, --output [path]', 'The path to the output file [corrupted_img.jpg]', 'corrupted_img.jpg')
 
     .parse(process.argv);
 
 /* Syntax error handling. */
-if (cl.args.length !== 1) return cl.help();
+if (cl.args.length !== 1) {
+    console.log(cl.args.length  + ' were provided.');
+    console.log('args: ' + cl.args);
+    return cl.help();
+}
 
 var input = cl.args[0];
 
@@ -29,6 +34,9 @@ return fs.readFile(input, function (err, data) {
     var options = {
         algorithm: cl.algorithm
     };
+
+    if (cl.params)
+        options.params = cl.params.split(',');
 
     var corr = corrupt(data, options);
 
