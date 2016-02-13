@@ -42,11 +42,7 @@ import corrupt from './corrupt';
         // Format: [ [ $algorithmName, param0, param1, ... paramN ], ... ]
         let [ name, ...params ] = algoString.trim().split(' ');
 
-        try {
-            return algorithms[name].init(params);
-        } catch (e) {
-            throw new Error('Invalid algorithm: ' + name);
-        }
+        return algorithms[name].init(params);
     });
 
     // Run the corruption with the command line args.

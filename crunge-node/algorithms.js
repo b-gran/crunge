@@ -28,10 +28,8 @@ class Algorithm {
     }
 
     description () {
-        return 'This algorithm requires ' + this.params.length + 'parameters,' +
-                _.map(this.params, (param) =>
-                    { return param.name + ': ' + param.type;
-                }).join(', ');
+        return 'This algorithm requires ' + this.params.length + ' parameters,\n\t' +
+                JSON.stringify(this.params);
     };
 
     // Returns a function that can corrupt a single byte or an array of bytes.
