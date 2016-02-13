@@ -1,47 +1,54 @@
-var fs = require('fs');
+import _ from 'underscore';
+import algorithms from './algorithms';
+import fs from 'fs';
 
-var corrupt = require('./corrupt');
+import JPGDecoder from 'jpg-stream/decoder';
+import JPGEncoder from 'jpg-stream/encoder';
+import CorruptStream from './corrupt-stream';
 
-var out = function (msg) {
-    process.stdout.write(msg);
-    return msg;
-};
+import corrupt from './corrupt';
 
-/* Set up the CLI. */
-var cl = require('commander')
-    .version('1.0.0')
-    .description('Corrupts images')
-    .usage('input_file [options]')
-
-    .option('-a, --algorithm [algorithm]', 'The corruption algorithm to use [noise]', 'noise')
-    .option('-p, --params [params]', 'Optional parameters for the algorithm in the form p0,p1,...,pn')
-    .option('-o, --output [path]', 'The path to the output file [corrupted_img.jpg]', 'corrupted_img.jpg')
-
-    .parse(process.argv);
-
-/* Syntax error handling. */
-if (cl.args.length !== 1) {
-    console.log(cl.args.length  + ' were provided.');
-    console.log('args: ' + cl.args);
-    return cl.help();
-}
-
-var input = cl.args[0];
-
-return fs.readFile(input, function (err, data) {
-    if (err) throw err;
-
-    var options = {
-        algorithm: cl.algorithm
+(() => {
+    var out = function (msg) {
+        process.stdout.write(msg);
+        return msg;
     };
 
-    if (cl.params)
-        options.params = cl.params.split(',');
+    /* Set up the CLI. */
+    var cl = require('commander')
+        .version('1.0.0')
+        .description('Corrupts images')
 
-    var corr = corrupt(data, options);
+        .usage('algorithm0 param0 ... paramN, algorithm1 ... [options]')
 
-    fs.writeFile(cl.output, corr, function (err) {
-        if (err) throw err;
-        else return 0;
+        .option('-i, --input [path]', 'The path to the input file')
+        .option('-o, --output [path]', 'The path to the output file [corrupted.jpg]', 'corrupted.jpg')
+
+        .parse(process.argv);
+
+    /* Error handling. */
+    if (cl.args.length < 1) {
+        console.warn('You must provide at least one algorithm');
+        return cl.help();
+    }
+
+    if (!cl.input) {
+        console.warn('You must supply an input path.')
+        return cl.help();
+    }
+
+    // Format: [ '$algorithmName param0 param1 ... paramN', ... ]
+    var algos = _.map(cl.args.join(' ').split(','), (algoString) => {
+        // Format: [ [ $algorithmName, param0, param1, ... paramN ], ... ]
+        let [ name, ...params ] = algoString.trim().split(' ');
+
+        try {
+            return algorithms[name].init(params);
+        } catch (e) {
+            throw new Error('Invalid algorithm: ' + name);
+        }
     });
-});
+
+    // Run the corruption with the command line args.
+    return corrupt(cl.input, cl.output, algos);
+})();
