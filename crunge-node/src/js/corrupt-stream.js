@@ -14,8 +14,16 @@ function CorruptStream (options) {
 
 util.inherits(CorruptStream, PixelStream);
 
+CorruptStream.prototype._start = function (done) {
+    // Save some image metadata for use by the algorithms.
+    return done();
+};
+
 CorruptStream.prototype._writePixels = function (chunk, done) {
-    var corrupted = new Buffer(chunk.length);
+    // Pass image metadata to the corruption algo
+    let { format, _frameSize } = this;
+
+    let corrupted = new Buffer(chunk.length);
 
     _.each(chunk, (byte, offset) => {
         corrupted.writeUInt8(this.algorithm(byte), offset);

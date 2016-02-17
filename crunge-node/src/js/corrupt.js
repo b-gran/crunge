@@ -1,8 +1,8 @@
 import _ from 'underscore';
 import fs from 'fs';
 
-import JPGDecoder from 'jpg-stream/decoder';
-import JPGEncoder from 'jpg-stream/encoder';
+import JPGDecoder from '../../node_modules/jpg-stream/decoder';
+import JPGEncoder from '../../node_modules/jpg-stream/encoder';
 import CorruptStream from './corrupt-stream';
 
 /**
