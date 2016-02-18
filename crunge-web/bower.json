@@ -1,9 +1,0 @@
-{
-  "name": "crunge",
-  "version": "0.0.1",
-  "dependencies": {
-    "react": "~0.13.3",
-    "foundation": "~5.5.2",
-    "modernizr": "~2.8.3"
-  }
-}
