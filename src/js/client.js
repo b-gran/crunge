@@ -1,2 +1,10 @@
 console.log('--- CLIENT ---');
 console.log(' ---- TESTING WATCHING ---')
+console.log('this is another test! of the watcher system.')
+console.log('this is yet another test! of the watcher system.')
+console.log('this is yet yet another test! of the watcher system.')
+console.log('this is another test.')
+console.log('this is another test! of the watcher system.')
+console.log('this is yet another test! of the watcher system.')
+console.log('this is yet yet another test! of the watcher system.')
+console.log('just keeps printing')

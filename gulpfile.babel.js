@@ -42,14 +42,18 @@ function mapError (err) {
 
 // Log file watcher updates
 function mapUpdate (evt) {
-    let shortPath = 'src' + evt.path.split('src').reduce((prev, current) => current);
-    gutil.log(
-        'File ' +
-        chalk.green(shortPath) +
-        ' was ' +
-        chalk.blue(evt.type) +
-        '. Rebuilding...'
-    );
+    let type = evt.type || 'updated';
+    let paths = _.flatten([ (evt.path || evt) ]);
+    _.each(paths, (path) => {
+        let shortenedPath = 'src' + path.split('src').reduce((prev, current) => current);
+        gutil.log(
+            'File ' +
+            chalk.green(shortenedPath) +
+            ' was ' +
+            chalk.blue(type) +
+            '. Rebuilding...'
+        );
+    })
 };
 
 // rm -rf the dist directory
@@ -170,7 +174,7 @@ function build (type, cb, tasks) {
 
     // The bundle:$type gulp task
     let bundleType = 'bundle' +
-        ((type === '')
+        ((type === 'default')
         ? ''
         : `:${type}`);
 
@@ -198,34 +202,3 @@ gulp.task('production', (done) => {
 gulp.task('dev', (done) => {
     return build('dev', done, [ 'sass:dev']);
 });
-
-/*
-// Copy files, build bundle, and compile sass
-gulp.task('default', (done) => {
-    return runSequence(
-        'clean',
-        [ 'bundle', 'sass', 'copy:index', 'bootstrap' ],
-        done
-    );
-});
-
-// Copy files, build bundle, and compile sass (no sourcemaps)
-gulp.task('production', (done) => {
-    return runSequence(
-        'clean',
-        [ 'bundle:production', 'sass', 'copy:index', 'bootstrap' ],
-        done
-    );
-});
-
-// Clean the output dir
-// Then bundle/compile and watch for changes
-gulp.task('dev', (done) => {
-    return runSequence(
-        'clean',
-        [ 'bundle:dev', 'sass', 'copy:index', 'bootstrap' ],
-        'sass:dev',
-        done
-    );
-});
-*/

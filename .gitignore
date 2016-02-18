@@ -3,3 +3,10 @@
 
 # IDE files
 .idea/
+
+# node modules
+node_modules/
+
+# Generated files
+dist/*
+!dist/.gitkeep
