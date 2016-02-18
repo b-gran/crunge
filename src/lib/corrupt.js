@@ -23,7 +23,7 @@ export default (input, output, algorithms) => {
     }, decodedStream);
 
     // Write the corrupted image to file
-    corruptedStream
+    return corruptedStream
         .pipe(new JPGEncoder({ quality: 50 }))
         .pipe(fs.createWriteStream(output));
 }

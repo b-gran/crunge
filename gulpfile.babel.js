@@ -45,7 +45,7 @@ function mapUpdate (evt) {
     let type = evt.type || 'updated';
     let paths = _.flatten([ (evt.path || evt) ]);
     _.each(paths, (path) => {
-        let shortenedPath = 'src' + path.split('src').reduce((prev, current) => current);
+        let shortenedPath = path.split('src').reduce((prev, current) => current);
         gutil.log(
             'File ' +
             chalk.green(shortenedPath) +
@@ -177,8 +177,6 @@ function build (type, cb, tasks) {
         ((type === 'default')
         ? ''
         : `:${type}`);
-
-    console.log('bundleType', bundleType);
 
     // An array of gulp tasks to run the build
     return runSequence.apply(null, [
