@@ -9,3 +9,6 @@ demo/
 
 # npm
 node_modules/
+
+# Generated files
+dist/*
