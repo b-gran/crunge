@@ -1,9 +1,0 @@
-# IDE files
-.idea/
-
-# Generate files (npm, bower)
-node_modules/
-public/bower
-
-# SASS intermediates
-.sass-cache
