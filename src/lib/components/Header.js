@@ -5,7 +5,7 @@ class Header extends Component {
 
     render () {
         return (
-            <Navbar fixedTop default>
+            <Navbar default id="nav-top">
                 <Grid>
                     { /* Brand */ }
                     <Navbar.Header pageScroll>

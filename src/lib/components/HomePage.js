@@ -8,11 +8,19 @@ class HomePage extends Component {
     render () {
         return (
             <Page>
-                <Row>
-                    <Col md={12}>
-                        Hello, world!
-                    </Col>
-                </Row>
+                <Grid>
+                    <Row>
+                        <Col md={12}>
+                            <div id="imageSelect">
+                                <a href="" id="btnUpload">
+                                    <div>
+                                        Select an image
+                                    </div>
+                                </a>
+                            </div>
+                        </Col>
+                    </Row>
+                </Grid>
             </Page>
         );
     };
