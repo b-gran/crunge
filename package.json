@@ -12,6 +12,7 @@
     "fbjs": "^0.7.2",
     "font-awesome": "^4.5.0",
     "glob": "^7.0.0",
+    "gulp-plumber": "^1.1.0",
     "image-size": "^0.4.0",
     "jpg-stream": "^1.1.1",
     "merge-stream": "^1.0.0",

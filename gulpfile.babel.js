@@ -10,6 +10,7 @@ import browserify from 'browserify';
 import watchify from 'watchify';
 
 import merge from 'merge-stream';
+import plumber from 'gulp-plumber';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
 import sourcemaps from 'gulp-sourcemaps';
@@ -227,6 +228,7 @@ gulp.task('bootstrap', (done) => {
 // Compile sass to css
 gulp.task('sass', () => {
     return gulp.src('src/scss/**/*.scss')
+        .pipe(plumber())
         .pipe(sass().on('error', mapError))
         .pipe(gulp.dest('dist/css'));
 });
