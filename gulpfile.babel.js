@@ -16,8 +16,14 @@ import uglify from 'gulp-uglify';
 import runSequence from 'run-sequence';
 import sass from 'gulp-sass';
 
+import emptyFunction from 'fbjs/lib/emptyFunction';
+
 import gutil from 'gulp-util';
 import chalk from 'chalk';
+
+/**
+ * OUTPUT HELPERS
+ */
 
 // Generate better looking error messages using chalk.
 function mapError (err) {
@@ -58,13 +64,21 @@ function mapUpdate (evt) {
     })
 };
 
-// rm -rf the dist directory
+/**
+ * CLEAN
+ * rm -rf the dist directory
+ */
+
 gulp.task('clean', () => {
     return del([ 'dist/**/*' ]);
 });
 
-// Generate a bundle from a browserify/watchify bundle
-function createBundle (bundler) {
+/**
+ * createBundle
+ * Generate a bundle from a browserify/watchify bundle
+ */
+
+function createBundle (bundler, cb) {
     return bundler.bundle()
         .on('error', mapError)
         .pipe(source('app.js'))
@@ -74,10 +88,14 @@ function createBundle (bundler) {
         .pipe(sourcemaps.init({ loadMaps: true }))
             .pipe(uglify())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/js'));
+        .pipe(gulp.dest('dist/js'))
+        .on('end', (cb || emptyFunction))
 };
 
-// Constants
+/*
+ * CONSTANTS
+ */
+
 const config = {
     // App entry
     entry: './src/js/client.js',
@@ -88,6 +106,10 @@ const config = {
     },
 };
 
+/**
+ * BROWSERIFY
+ */
+
 // Generate a browserify bundle
 gulp.task('bundle', () => {
     let bundler = browserify(config.entry, { debug: true }).transform(babelify, config.babelOpts);
@@ -95,11 +117,11 @@ gulp.task('bundle', () => {
 });
 
 // Generate a browserify bundle, watch for changes, and rebuild
-gulp.task('bundle:dev', () => {
+gulp.task('bundle:dev', (done) => {
     let args = _.extend(watchify.args, { debug: true });
     let bundler = watchify(browserify(config.entry, args)).transform(babelify, config.babelOpts);
 
-    createBundle(bundler);
+    createBundle(bundler, done);
     bundler.on('update', (evt) => {
         mapUpdate(evt);
         createBundle(bundler);
@@ -120,17 +142,51 @@ gulp.task('bundle:production', () => {
         .pipe(gulp.dest('dist/js'))
 });
 
+/**
+ * FILE COPYING
+ */
+
+// Copy a src glob to dest
+function copyFiles (src, dest) {
+    return gulp
+        .src(src)
+        .pipe(gulp.dest(dest));
+};
+
 // Just copy index.html to the dist directory
 gulp.task('copy', () => {
-    return gulp
-        .src('src/index.html')
-        .pipe(gulp.dest('dist'));
+    return copyFiles('src/index.html', 'dist');
 });
 
 // Re-copy index.html after changes
 gulp.task('copy:dev', () => {
     let watcher = gulp.watch('src/index.html', [ 'copy' ]);
     watcher.on('change', mapUpdate);
+});
+
+// Copies font-awesome files to dist/
+gulp.task('font-awesome', (done) => {
+    runSequence(
+        [ 'font-awesome:fonts', 'font-awesome:css' ],
+        done
+    );
+});
+
+gulp.task('font-awesome:css', () => {
+    return copyFiles(
+        [
+            'node_modules/font-awesome/css/font-awesome.min.css',
+            'node_modules/font-awesome/css/font-awesome.css.map',
+        ],
+        'dist/css'
+    );
+});
+
+gulp.task('font-awesome:fonts', () => {
+    return copyFiles(
+        'node_modules/font-awesome/fonts/*',
+        'dist/fonts'
+    );
 });
 
 // Copies the bootstrap files from node_modules/ to dist/
@@ -156,6 +212,10 @@ gulp.task('bootstrap:fonts', () => {
         .pipe(gulp.dest('dist/fonts'));
 });
 
+/**
+ * SASS COMPILATION
+ */
+
 // Compile sass to css
 gulp.task('sass', () => {
     return gulp.src('src/scss/**/*.scss')
@@ -168,6 +228,13 @@ gulp.task('sass:dev', () => {
     let watcher = gulp.watch('src/scss/**/*.scss', [ 'sass' ]);
     watcher.on('change', mapUpdate);
 });
+
+/**
+ * BUILD TASKS
+ *
+ * Sequentially run all of the tasks required to bundle the app
+ * and generate auxiliary files.
+ */
 
 // The dev, dev+watch, and production builds are almost identical.
 // The only difference is watch and sourcemaps.
@@ -189,7 +256,7 @@ function build (type, cb, tasks) {
     // An array of gulp tasks to run the build
     return runSequence.apply(null, [
         'clean',
-        [ bundleType, 'sass', 'copy', 'bootstrap' ],
+        [ bundleType, 'sass', 'copy', 'bootstrap', 'font-awesome' ],
     ].concat(tasks || []).concat(cb));
 }
 
@@ -209,13 +276,17 @@ gulp.task('dev', (done) => {
     return build('dev', done, [ [ 'sass:dev', 'copy:dev' ], 'server' ]);
 });
 
-// Run a browsersync dev server
+/**
+ * SERVER
+ *
+ * Starts a browsersync dev server.
+ */
+
 const bs = browserSync.create();
 gulp.task('server', () => {
     bs.init({
         server: {
             baseDir: 'dist',
-            // directory: true,
         }
     });
 });
