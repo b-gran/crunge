@@ -3,6 +3,8 @@ import gulp from 'gulp';
 import rename from 'gulp-rename';
 import del from 'del';
 
+import browserSync from 'browser-sync';
+
 import babelify from 'babelify';
 import browserify from 'browserify';
 import watchify from 'watchify';
@@ -82,7 +84,7 @@ const config = {
 
     // Supported langauges
     babelOpts: {
-        presets: [ 'es2015', 'react' ]
+        presets: [ 'es2015', 'react', 'stage-0' ]
     },
 };
 
@@ -119,10 +121,16 @@ gulp.task('bundle:production', () => {
 });
 
 // Just copy index.html to the dist directory
-gulp.task('copy:index', () => {
+gulp.task('copy', () => {
     return gulp
         .src('src/index.html')
         .pipe(gulp.dest('dist'));
+});
+
+// Re-copy index.html after changes
+gulp.task('copy:dev', () => {
+    let watcher = gulp.watch('src/index.html', [ 'copy' ]);
+    watcher.on('change', mapUpdate);
 });
 
 // Copies the bootstrap files from node_modules/ to dist/
@@ -181,7 +189,7 @@ function build (type, cb, tasks) {
     // An array of gulp tasks to run the build
     return runSequence.apply(null, [
         'clean',
-        [ bundleType, 'sass', 'copy:index', 'bootstrap' ],
+        [ bundleType, 'sass', 'copy', 'bootstrap' ],
     ].concat(tasks || []).concat(cb));
 }
 
@@ -198,5 +206,16 @@ gulp.task('production', (done) => {
 // Clean the output dir
 // Then bundle/compile and watch for changes
 gulp.task('dev', (done) => {
-    return build('dev', done, [ 'sass:dev']);
+    return build('dev', done, [ [ 'sass:dev', 'copy:dev' ], 'server' ]);
+});
+
+// Run a browsersync dev server
+const bs = browserSync.create();
+gulp.task('server', () => {
+    bs.init({
+        server: {
+            baseDir: 'dist',
+            // directory: true,
+        }
+    });
 });

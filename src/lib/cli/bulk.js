@@ -1,18 +1,18 @@
 import _ from 'underscore';
-import algorithms from './algorithms';
+import algorithms from './../core/algorithms';
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import moment from 'moment';
 
-import JPGDecoder from '../../node_modules/jpg-stream/decoder';
-import JPGEncoder from '../../node_modules/jpg-stream/encoder';
-import CorruptStream from './corrupt-stream';
+import JPGDecoder from '../../../node_modules/jpg-stream/decoder';
+import JPGEncoder from '../../../node_modules/jpg-stream/encoder';
+import CorruptStream from './../core/corrupt-stream';
 
 import glob from 'glob';
 import async from 'async';
 
-import corrupt from './corrupt';
+import corrupt from './../core/corrupt';
 
 // Using an IIFE, we can return early.
 (() => {

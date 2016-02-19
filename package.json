@@ -3,10 +3,13 @@
   "version": "2.0.0",
   "dependencies": {
     "async": "^1.5.2",
+    "babel-preset-stage-0": "^6.5.0",
     "bootstrap": "^3.3.6",
     "chalk": "^1.1.1",
     "commander": "^2.8.1",
     "del": "^2.2.0",
+    "fastclick": "^1.0.6",
+    "fbjs": "^0.7.2",
     "glob": "^7.0.0",
     "image-size": "^0.4.0",
     "jpg-stream": "^1.1.1",
@@ -14,6 +17,8 @@
     "pixel-stream": "^1.0.3",
     "react": "^0.14.7",
     "react-bootstrap": "^0.28.3",
+    "react-dom": "^0.14.7",
+    "react-router": "^2.0.0",
     "stream-buffers": "^3.0.0",
     "underscore": "^1.8.3"
   },
