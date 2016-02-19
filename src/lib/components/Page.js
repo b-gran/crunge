@@ -13,11 +13,11 @@ class Page extends Component {
 
     render() {
         return !this.props.error ? (
-            <Grid className="content">
+            <div className="content">
                 <Header />
                 {this.props.children}
                 <Footer />
-            </Grid>
+            </div>
         )
             : this.props.children;
     };
