@@ -14,6 +14,7 @@
     "glob": "^7.0.0",
     "image-size": "^0.4.0",
     "jpg-stream": "^1.1.1",
+    "merge-stream": "^1.0.0",
     "moment": "^2.11.2",
     "pixel-stream": "^1.0.3",
     "react": "^0.14.7",

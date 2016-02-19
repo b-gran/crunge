@@ -9,6 +9,7 @@ import babelify from 'babelify';
 import browserify from 'browserify';
 import watchify from 'watchify';
 
+import merge from 'merge-stream';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
 import sourcemaps from 'gulp-sourcemaps';
@@ -154,63 +155,65 @@ function copyFiles (src, dest) {
 };
 
 // Just copy index.html to the dist directory
-gulp.task('copy', () => {
+gulp.task('html', () => {
     return copyFiles('src/index.html', 'dist');
 });
 
 // Re-copy index.html after changes
-gulp.task('copy:dev', () => {
-    let watcher = gulp.watch('src/index.html', [ 'copy' ]);
+gulp.task('html:dev', () => {
+    let watcher = gulp.watch('src/index.html', [ 'html' ]);
     watcher.on('change', mapUpdate);
+});
+
+// Copy the assets to dist, preserving file structure
+gulp.task('assets', () => {
+    return gulp
+        .src('assets/**/*', { base: 'assets' })
+        .pipe(gulp.dest('dist'));
 });
 
 // Copies font-awesome files to dist/
 gulp.task('font-awesome', (done) => {
-    runSequence(
-        [ 'font-awesome:fonts', 'font-awesome:css' ],
-        done
-    );
-});
-
-gulp.task('font-awesome:css', () => {
-    return copyFiles(
+    let css = copyFiles(
         [
             'node_modules/font-awesome/css/font-awesome.min.css',
             'node_modules/font-awesome/css/font-awesome.css.map',
         ],
         'dist/css'
     );
-});
 
-gulp.task('font-awesome:fonts', () => {
-    return copyFiles(
+    let fonts = copyFiles(
         'node_modules/font-awesome/fonts/*',
         'dist/fonts'
     );
+
+    return merge(css, fonts);
 });
 
 // Copies the bootstrap files from node_modules/ to dist/
 gulp.task('bootstrap', (done) => {
+    /*
     return runSequence(
         [ 'bootstrap:css', 'bootstrap:fonts' ],
         done
     );
-})
+    */
 
-// Copies bootstrap css only
-gulp.task('bootstrap:css', () => {
-    return gulp.src([
+    let css = copyFiles(
+        [
             './node_modules/bootstrap/dist/css/bootstrap.min.css',
-            './node_modules/bootstrap/dist/css/bootstrap.min.css.map', ])
-        .pipe(gulp.dest('dist/css'));
-});
+            './node_modules/bootstrap/dist/css/bootstrap.min.css.map'
+        ],
+        'dist/css'
+    );
 
-// Copies bootstrap fonts only
-gulp.task('bootstrap:fonts', () => {
-    return gulp
-        .src('./node_modules/bootstrap/dist/fonts/**/*')
-        .pipe(gulp.dest('dist/fonts'));
-});
+    let fonts = copyFiles(
+        './node_modules/bootstrap/dist/fonts/**/*',
+        'dist/fonts'
+    );
+
+    return merge(css, fonts);
+})
 
 /**
  * SASS COMPILATION
@@ -253,10 +256,10 @@ function build (type, cb, tasks) {
         ? ''
         : `:${type}`);
 
-    // An array of gulp tasks to run the build
+    // The array of gulp tasks needed to complete the build
     return runSequence.apply(null, [
         'clean',
-        [ bundleType, 'sass', 'copy', 'bootstrap', 'font-awesome' ],
+        [ bundleType, 'sass', 'assets', 'html', 'bootstrap', 'font-awesome' ],
     ].concat(tasks || []).concat(cb));
 }
 
@@ -273,7 +276,7 @@ gulp.task('production', (done) => {
 // Clean the output dir
 // Then bundle/compile and watch for changes
 gulp.task('dev', (done) => {
-    return build('dev', done, [ [ 'sass:dev', 'copy:dev' ], 'server' ]);
+    return build('dev', done, [ [ 'sass:dev', 'html:dev' ], 'server' ]);
 });
 
 /**
