@@ -52,7 +52,12 @@ function mapError (err) {
 // Log file watcher updates
 function mapUpdate (evt) {
     let type = evt.type || 'updated';
+
+    // For non-browserify events, the changed paths are in evt.path
+    // For browserify events, evt is the changed paths
+    // evt.path & path can either be a single path or an array of paths.
     let paths = _.flatten([ (evt.path || evt) ]);
+
     _.each(paths, (path) => {
         let shortenedPath = path.split('src').reduce((prev, current) => current);
         gutil.log(
@@ -79,7 +84,7 @@ gulp.task('clean', () => {
  * Generate a bundle from a browserify/watchify bundle
  */
 
-function createBundle (bundler, cb) {
+function createBundle (bundler, cb = emptyFunction) {
     return bundler.bundle()
         .on('error', mapError)
         .pipe(source('app.js'))
@@ -90,7 +95,7 @@ function createBundle (bundler, cb) {
             .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
-        .on('end', (cb || emptyFunction))
+        .on('end', cb)
 };
 
 /*
@@ -246,7 +251,7 @@ gulp.task('sass:dev', () => {
 //
 // tasks is an optional array of gulp tasks to run after the build is complete
 // tasks should be in a format runSequence will understand.
-function build (type, cb, tasks) {
+function build (type, cb, tasks = []) {
     if (!_.contains([ 'default', 'dev', 'production' ], type))
         throw new Error('type must be one of [dev, production, default].');
 
@@ -260,7 +265,7 @@ function build (type, cb, tasks) {
     return runSequence.apply(null, [
         'clean',
         [ bundleType, 'sass', 'assets', 'html', 'bootstrap', 'font-awesome' ],
-    ].concat(tasks || []).concat(cb));
+    ].concat(tasks).concat(cb));
 }
 
 // Copy files, build bundle, and compile sass
