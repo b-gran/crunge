@@ -12,6 +12,8 @@ import CorruptStream from './../core/corrupt-stream';
 import glob from 'glob';
 import async from 'async';
 
+import md5 from 'blueimp-md5';
+
 import corrupt from './../core/corrupt';
 
 // Using an IIFE, we can return early.
@@ -100,10 +102,15 @@ import corrupt from './../core/corrupt';
         // These tasks will be started (but not run) in parallel
         files.map((file) => {
             return (done) => {
+                // A random identifier so that two images with the same set
+                // of algorithms won't have the same filename.
+                let hash = md5(Date.now() + algoNames).slice(0, 6);
+
+                // Get the extension and extension-less name
                 let basename = path.basename(file);
                 let ext = path.extname(basename);
                 let nameNoExt = basename.split(ext)[0];
-                let outputPath = path.join(cl.output, `${nameNoExt}.${algoNames}${ext}`);
+                let outputPath = path.join(cl.output, `${nameNoExt}.${algoNames}.${hash}${ext}`);
 
                 let coloredOutput = chalk.blue(outputPath);
                 info('Corrupting ' + chalk.green(file) + ' -> ' + coloredOutput);
