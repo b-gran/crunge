@@ -61,8 +61,6 @@ export default {
     // Adds positive noise in the range [0, 10] to each byte, modulo the maximum byte val.
     lessnoise: new Algorithm (function () {
         return function (byte) {
-            console.log('this');
-            console.log(this);
             return (byte + (Math.random() * 10 | 0)) % 255;
         };
     }),
