@@ -20,6 +20,7 @@ class Header extends Component {
                         <Nav pullRight>
                             <NavItem eventKey={1}>how?</NavItem>
                             <NavItem eventKey={2}>why?</NavItem>
+                            <NavItem eventKey={3}>who?</NavItem>
                         </Nav>
                     </Navbar.Collapse>
                 </Grid>

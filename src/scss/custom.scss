@@ -1,56 +1,110 @@
+/**
+ * IMPORTS
+ */
+
+// PT Mono monospaced font from google
+@import "https://fonts.googleapis.com/css?family=PT+Mono";
+
+// Bootstrap variables
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/_variables.scss";
+
+/**
+ * "GLOBAL" VARIABLES
+ */
+
 $app-bg: #FFEEC6;
+$app-font: 'PT Mono', monospace;
+
+// MEDIA QUERIES
+
+/* Phones */
+$phones: "(max-width: #{$screen-xs-max})";
+
+/* Small devices (tablets, 768px and up) */
+$tablets: "(min-width: #{$screen-sm-min})";
+$tablets-only: "(min-width: #{$screen-sm-min}) and (max-width: #{$screen-sm-max})";
+
+/* Medium devices (desktops, 992px and up) */
+$desktops: "(min-width: #{$screen-md-min})";
+$desktops-only: "(min-width: #{$screen-md-min}) and (max-width: #{$screen-md-max})";
+
+/* Large devices (large desktops, 1200px and up) */
+$large-desktops: "(min-width: #{$screen-lg-min})";
 
 body {
   background: $app-bg;
+  font-family: $app-font;
 }
 
-#nav-top {
+#nav-top.navbar {
   margin-top: 20px;
   background: $app-bg;
+  font-family: $app-font;
+
+  text-transform: lowercase;
 }
 
 /**
  * IMAGE SELECT BUTTON
  */
 
+#imgSelWrap {
+  transition-property: width, height, margin, top, left, padding;
+  transition-duration: 1s;
+  transition-timing-function: ease;
+}
+
 #imageSelect {
   display: table;
-
   width: 100%;
-  height: 400px;
+
+  // Height for phones
+  height: 200px;
+
+  @media #{$tablets} {
+    // Height for tablets
+    height: 400px;
+  }
 
   // Diagonal purple gradient
   background: repeating-linear-gradient(
     -45deg,
-    #606dbc,
-    #606dbc 10px,
-    #465298 10px,
-    #465298 20px
+    #8d81bc,
+    #8d81bc 10px,
+    #1B224B 10px,
+    #1B224B 20px
   );
 
   a#btnUpload {
     display: table-cell;
     vertical-align: middle;
     text-align: center;
+    text-decoration: none;
 
     // Darken the upload box on hover
     background: none;
-    transition: background-color 0.5s ease;
+    transition: background-color 0.3s ease;
 
     div {
       color: white;
       background: #1B224B;
-      width: 60%;
-      font-size: 50px;
       text-transform: uppercase;
       margin: 0 auto;
       padding: 30px;
+
+      // Width for phone screens
+      width: 80%;
+      font-size: 25px;
+
+      @media #{$tablets} {
+        // Width for tablets
+        width: 60%;
+        font-size: 50px;
+      }
     }
   }
 
   a#btnUpload:hover {
-    text-decoration: none;
-
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
   }
 }
