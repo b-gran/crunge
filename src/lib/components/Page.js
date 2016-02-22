@@ -5,6 +5,7 @@ import Footer from './Footer';
 import { Grid } from 'react-bootstrap';
 
 class Page extends Component {
+    static displayName = 'Page';
 
     static propTypes = {
         children: PropTypes.element.isRequired,

@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { Nav, NavItem } from 'react-bootstrap';
 
 class Footer extends Component {
+    static displayName = 'Footer';
 
     render () {
         return (

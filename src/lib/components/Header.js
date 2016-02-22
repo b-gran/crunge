@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { Navbar, Grid, Nav, NavItem } from 'react-bootstrap';
 
 class Header extends Component {
+    static displayName = 'Header';
 
     render () {
         return (
