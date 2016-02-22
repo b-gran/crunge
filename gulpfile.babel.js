@@ -50,6 +50,13 @@ function mapError (err) {
         + chalk.yellow(err.message));
 };
 
+// Just like mapError, but emits an end event to fix issues
+// with some plugins (like gulp-sass).
+function mapErrorEnd (err) {
+    mapError(err);
+    this.emit('end');
+};
+
 // Log file watcher updates
 function mapUpdate (evt) {
     let type = evt.type || 'updated';
@@ -228,8 +235,8 @@ gulp.task('bootstrap', (done) => {
 // Compile sass to css
 gulp.task('sass', () => {
     return gulp.src('src/scss/**/*.scss')
-        .pipe(plumber())
-        .pipe(sass().on('error', mapError))
+        .pipe(plumber(mapErrorEnd))
+        .pipe(sass())
         .pipe(gulp.dest('dist/css'));
 });
 
