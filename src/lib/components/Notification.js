@@ -3,20 +3,22 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 // Styles required by ReactCSSTransitionGroup
 const animationStyles = (enterDirection, leaveDirection) => {
-    function stylesByDirection (direction) {
-        const opposite = {
+    function opposite (direction) {
+        return {
             up: 'down',
             down: 'up',
             left: 'right',
             right: 'left'
         }[direction];
+    }
 
+    function stylesByDirection (direction) {
         const cssAnchor = {
             up: 'top',
             down: 'bottom',
             left: 'left',
             right: 'right'
-        }[opposite];
+        }[direction];
 
         const distance = 50;
         const distances = {
@@ -28,7 +30,7 @@ const animationStyles = (enterDirection, leaveDirection) => {
         return distances;
     }
 
-    const enterDistances = stylesByDirection(enterDirection),
+    const enterDistances = stylesByDirection(opposite(enterDirection)),
           leaveDistances = stylesByDirection(leaveDirection);
 
     return {
@@ -96,6 +98,12 @@ class Notification extends Component {
         // How long should the notification be visible before hiding itself? In ms.
         // If duration isn't specified, the component will not hide itself.
         duration: PropTypes.number,
+
+        // If true, an close button will be shown
+        dismissible: PropTypes.bool,
+
+        // Handler to call when the dismiss button is pressed
+        onDismiss: PropTypes.func,
     };
 
     static defaultProps = {
@@ -109,6 +117,10 @@ class Notification extends Component {
 
     constructor (props) {
         super(props);
+
+        if (props.dismissible && !props.onDismiss)
+            throw new Error('An onDismiss handler is required if the notification is dismissible');
+
         // A key is needed for the CSS transition.
         this.key = `${props.message}${Date.now()}`;
     };
@@ -144,7 +156,17 @@ class Notification extends Component {
                          ?  <div style={defaultStyles} key={this.key}
                                  className="react-simple-notification">
                                 { message }
+
+                                {
+                                    (this.props.dismissible)
+                                        ? <i className="fa fa-times"
+                                             style={{ float: 'right', lineHeight: '1.3em' }}
+                                             onClick={this.props.onDismiss}/>
+
+                                        : ''
+                                }
                             </div>
+                            
                          : ''
                     }
                 </ReactCSSTransitionGroup>
