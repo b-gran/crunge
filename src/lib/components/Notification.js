@@ -31,7 +31,9 @@ const animationStyles = (enterDirection, leaveDirection) => {
     }
 
     const enterDistances = stylesByDirection(opposite(enterDirection)),
-          leaveDistances = stylesByDirection(leaveDirection);
+        leaveDistances = stylesByDirection(leaveDirection);
+
+    const animationInSeconds = Notification.animationDuration / 1000;
 
     return {
         __html: `
@@ -47,10 +49,14 @@ const animationStyles = (enterDirection, leaveDirection) => {
           ${enterDistances.final}
 
           transition-property: ${enterDistances.property}, opacity;
-          transition-duration: 0.3s;
+          transition-duration: ${animationInSeconds}s;
           transition-timing-function: ease;
         }
 
+        .react-simple-notification {
+          ${enterDistances.final}
+          ${leaveDistances.final}
+        }
 
         .react-simple-notification.notification-transition-leave {
           opacity: 1;
@@ -62,15 +68,57 @@ const animationStyles = (enterDirection, leaveDirection) => {
           ${leaveDistances.initial}
 
           transition-property: ${leaveDistances.property}, opacity;
-          transition-duration: 0.3s;
+          transition-duration: ${animationInSeconds}s;
           transition-timing-function: ease;
         }`,
     };
 };
 
+const directions = ['left', 'right', 'up', 'down'];
+
+const transitionClass = 'notification-transition';
+
+class NotificationStack extends Component {
+    static displayName = 'NotificationStack';
+
+    static propTypes = {
+        // Which directions the notifications enter and leave from.
+        enterDirection: PropTypes.oneOf(directions),
+        leaveDirection: PropTypes.oneOf(directions),
+    };
+
+    static defaultProps = {
+        enterDirection: 'down',
+        leaveDirection: 'up',
+    };
+
+    render () {
+        return (
+            <div>
+                <style dangerouslySetInnerHTML={
+                           animationStyles(
+                               this.props.enterDirection,
+                               this.props.leaveDirection
+                           )}
+                />
+                <ReactCSSTransitionGroup transitionName={transitionClass}
+                                         transitionAppear={true}
+                                         transitionAppearTimeout={Notification.animationDuration}
+                                         transitionEnterTimeout={Notification.animationDuration}
+                                         transitionLeaveTimeout={Notification.animationDuration * 2.5}>
+                    {
+                        this.props.children
+                    }
+                </ReactCSSTransitionGroup>
+            </div>
+        )
+    };
+}
+
 // Default styles for the notifications.
 const defaultStyles = {
     position: 'relative',
+
     width: '100%',
     marginTop: '20px',
 
@@ -82,22 +130,13 @@ const defaultStyles = {
     padding: '12px',
 };
 
-const directions = [ 'left', 'right', 'up', 'down' ];
 
 class Notification extends Component {
     static displayName = 'Notification';
 
     static propTypes = {
-        // Which directions the notification enters and leaves from.
-        enterDirection: PropTypes.oneOf(directions),
-        leaveDirection: PropTypes.oneOf(directions),
-
         // Message to display in the notification
         message: PropTypes.string.isRequired,
-
-        // How long should the notification be visible before hiding itself? In ms.
-        // If duration isn't specified, the component will not hide itself.
-        duration: PropTypes.number,
 
         // If true, an close button will be shown
         dismissible: PropTypes.bool,
@@ -111,9 +150,7 @@ class Notification extends Component {
         leaveDirection: 'up',
     };
 
-    state = {
-        visible: true,
-    };
+    static animationDuration = 500; // in ms
 
     constructor (props) {
         super(props);
@@ -125,54 +162,25 @@ class Notification extends Component {
         this.key = `${props.message}${Date.now()}`;
     };
 
-    componentDidMount () {
-        // Hide the notification automatically after props.duration
-        if (this.props.duration)
-            setTimeout(() => {
-                this.setState({
-                    visible: false,
-                })
-            }, this.props.duration);
-    };
-
     render () {
         let { message } = this.props;
         return (
-            <div>
-                <style dangerouslySetInnerHTML= {
-                           animationStyles(
-                               this.props.enterDirection,
-                               this.props.leaveDirection
-                           )}
-                />
+            <div style={defaultStyles} key={this.key}
+                 className="react-simple-notification">
 
-                <ReactCSSTransitionGroup transitionName="notification-transition"
-                                         transitionAppear={true}
-                                         transitionAppearTimeout={300}
-                                         transitionEnterTimeout={300}
-                                         transitionLeaveTimeout={300} >
-                    {
-                        (this.state.visible)
-                         ?  <div style={defaultStyles} key={this.key}
-                                 className="react-simple-notification">
-                                { message }
+                { message }
 
-                                {
-                                    (this.props.dismissible)
-                                        ? <i className="fa fa-times"
-                                             style={{ float: 'right', lineHeight: '1.3em' }}
-                                             onClick={this.props.onDismiss}/>
+                {
+                    (this.props.dismissible)
+                        ? <i className="fa fa-times"
+                             style={{ float: 'right', lineHeight: '1.3em' }}
+                             onClick={this.props.onDismiss}/>
 
-                                        : ''
-                                }
-                            </div>
-                            
-                         : ''
-                    }
-                </ReactCSSTransitionGroup>
+                        : null
+                }
             </div>
-        )
+        );
     };
-};
+}
 
-export default Notification;
+export { Notification, NotificationStack };
