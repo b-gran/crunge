@@ -3,8 +3,8 @@ import { render } from 'react-dom';
 import { browserHistory, match, Router } from 'react-router';
 import attach from 'fastclick';
 
-import App from '../lib/components/App';
-import routes from '../lib/routes';
+import App from './lib/components/App';
+import routes from './lib/routes';
 
 const appContainer = document.getElementById('app')
 
@@ -49,11 +49,3 @@ function run() {
 };
 
 document.addEventListener('DOMContentLoaded', run, false);
-/*
-// Run the application when both DOM is ready and page content is loaded
-if (['complete', 'loaded', 'interactive'].includes(document.readyState) && document.body) {
-    run();
-} else {
-    document.addEventListener('DOMContentLoaded', run, false);
-}
-*/

@@ -112,7 +112,7 @@ function createBundle (bundler, cb = emptyFunction) {
 
 const config = {
     // App entry
-    entry: './src/js/client.js',
+    entry: './src/client.js',
 
     // Supported langauges
     babelOpts: {
