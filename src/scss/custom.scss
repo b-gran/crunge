@@ -15,6 +15,15 @@
 $app-bg: #FFEEC6;
 $app-font: 'PT Mono', monospace;
 
+$purple-stripes: repeating-linear-gradient(
+                  -45deg,
+                  #8d81bc,
+                  #8d81bc 10px,
+                  #1B224B 10px,
+                  #1B224B 20px
+);
+$stripe-inner-block: #1B224B;
+
 // MEDIA QUERIES
 
 /* Phones */
@@ -36,6 +45,14 @@ body {
   font-family: $app-font;
 }
 
+.row {
+  margin-bottom: 20px;
+}
+
+/**
+ * TOP NAV
+ */
+
 #nav-top.navbar {
   margin-top: 20px;
   background: $app-bg;
@@ -48,13 +65,19 @@ body {
  * IMAGE SELECT BUTTON
  */
 
-#imgSelWrap {
-  transition-property: width, height, margin, top, left, padding;
+#image-select-wrap {
+  // transition-property: width, height, margin, top, left, padding;
+  transition-property: all;
   transition-duration: 1s;
   transition-timing-function: ease;
+
+  display: inline-block;
+
+  // Center the image
+  text-align: center;
 }
 
-#imageSelect {
+#image-select {
   display: table;
   width: 100%;
 
@@ -66,14 +89,7 @@ body {
     height: 400px;
   }
 
-  // Diagonal purple gradient
-  background: repeating-linear-gradient(
-                  -45deg,
-                  #8d81bc,
-                  #8d81bc 10px,
-                  #1B224B 10px,
-                  #1B224B 20px
-  );
+  background: $purple-stripes;
 
   a#btnUpload {
     display: table-cell;
@@ -88,7 +104,7 @@ body {
 
     div {
       color: white;
-      background: #1B224B;
+      background: $stripe-inner-block;
       text-transform: uppercase;
       margin: 0 auto;
       padding: 30px;
@@ -116,5 +132,76 @@ body {
 
   a#btnUpload:hover {
     background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/**
+ * IMAGE VIEWER
+ */
+
+.image-viewer {
+  background: $purple-stripes;
+
+  .viewer-inner-text {
+    color: white;
+    background: $stripe-inner-block;
+    padding: 10px;
+    display: inline-block;
+  }
+
+  .title {
+    text-align: center;
+    color: white;
+
+    span {
+      @extend .viewer-inner-text;
+      margin-top: 10px;
+    }
+  }
+
+  img.main-image {
+    display: block;
+    margin: 0 auto;
+
+    box-sizing: content-box;
+    padding: 10px;
+  }
+
+  label.select-new-image {
+    @extend .viewer-inner-text;
+    margin-bottom: 10px;
+    cursor: pointer;
+
+    > input {
+      display: none;
+    }
+  }
+}
+
+
+/**
+ * ALGORITHM LIST
+ */
+
+ul.algorithm-list {
+  display: inline-block;
+
+  li {
+    display: inline-block;
+
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid;
+    border-radius: 2px;
+
+    background: #F5F5F5;
+    transition: background-color 0.3s ease;
+
+    cursor: pointer;
+  }
+
+  li:hover {
+    // Darken on hover
+    background: darken(#F5F5F5, 30%);
   }
 }
