@@ -5,6 +5,7 @@ import algorithms from '../core/algorithms';
 import React, { Component, PropTypes } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { Motion, spring } from 'react-motion';
 
 import Page from './Page';
 
@@ -81,17 +82,6 @@ class ImageViewer extends Component {
     };
 
     render () {
-        let content = (() => {
-            // Display the image if the user has selected one.
-            if (this.props.imageURI)
-                return <ImageViewer.Image imageName={this.props.imageName}
-                              imageURI={this.props.imageURI}
-                              onSelectFile={::this.handleSelectFile} />;
-
-            // Show an image selection button if not.
-            return <ImageViewer.SelectButton onSelectFile={::this.handleSelectFile} />;
-        })();
-
         return (
             <div>
                 {
@@ -100,13 +90,14 @@ class ImageViewer extends Component {
                         if (this.props.imageURI)
                             return <ImageViewer.Image imageName={this.props.imageName}
                                                       imageURI={this.props.imageURI}
-                                                      onSelectFile={::this.handleSelectFile} />;
+                                                      onSelectFile={::this.handleSelectFile}/>;
 
                         // Show an image selection button if not.
-                        return <ImageViewer.SelectButton onSelectFile={::this.handleSelectFile} />;
+                        return <ImageViewer.SelectButton onSelectFile={::this.handleSelectFile}/>;
                     })()
                 }
 
+                { /* Show any error messages. */ }
                 <NotificationStack>
                     {
                         this.state.errors.map((msg, idx) => {
@@ -161,19 +152,13 @@ class HomePage extends Component {
         selectedImage: null,
         imageString: null,
         filename: null,
-
-        imageSelectErrors: {
-            fileType: false,
-        }
     };
 
     handleSelectFile (file) {
+        // TODO: implement as a Web Worker so the UI doesn't block and freeze up.
         setTimeout(() => {
             let reader = new FileReader();
             reader.onload = (e) => {
-                console.log('loaded file');
-                console.log(e);
-
                 let imageString = arrayBufferToBase64(e.target.result);
                 return this.setState({
                     filename: file.name,
@@ -189,7 +174,7 @@ class HomePage extends Component {
         let imageSelectProps = (this.state.selectedImage)
             // After an image selected, it gets moved to the left
             // side of the page and the controls show up on the right.
-            ? {sm: 6}
+            ? {sm: 6 }
 
             // When an image isn't selected, the image select box
             // sits in the center of the page.
@@ -204,29 +189,60 @@ class HomePage extends Component {
             } :
             {};
 
+        let Algorithm = (props) => (
+            <li className="algorithm">
+                <span>{ props.name }</span>
+            </li>
+        );
+
+        let animationCSS = (x, opacity) => ({
+            transform: `translate3d(${x}px, 0, 0)`,
+            opacity
+        });
+
+        let algorithmStyle = (this.state.selectedImage) ?
+            {
+                x: spring(0),
+                opacity: spring(1)
+            } :
+            {
+                x: spring(800),
+                opacity: spring(0)
+            };
+
         return (
             <Page>
                 <Grid>
                     <Row>
                         <Col id="image-select-wrap" { ...imageSelectProps }>
+                            <h3 className="instructions">step 1. select an image</h3>
                             <ImageViewer onSelectImage={::this.handleSelectFile} { ...viewerProps } />
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={12}>
-                            <ul className="algorithm-list">
-                                {
-                                    _.map(algorithms, (_$, name) => {
-                                        console.log(_$, name);
-                                        return (
-                                            <li className="algorithm">
-                                                <span>{ name }</span>
-                                            </li>
+                        {
+                            (this.state.selectedImage) ?
+                                <Motion
+                                    defaultStyle={{
+                                            x: 800,
+                                            opacity: 0 }}
+                                    style={algorithmStyle}>
+                                    {
+                                        ({x, opacity}) => (
+                                            <Col sm={6}
+                                                 style={animationCSS(x, opacity)}>
+                                                <h3 className="instructions">step 2. add some filters</h3>
+                                                <ul className="algorithm-list">
+                                                    {
+                                                        _.map(algorithms, (__, name) => {
+                                                            return <Algorithm key={name} name={name}/>
+                                                        })
+                                                    }
+                                                </ul>
+                                            </Col>
                                         )
-                                    })
-                                }
-                            </ul>
-                        </Col>
+                                    }
+                                </Motion> :
+                                null
+                        }
                     </Row>
                 </Grid>
             </Page>

@@ -55,9 +55,9 @@ body {
 
 #nav-top.navbar {
   margin-top: 20px;
+  margin-bottom: 0;
   background: $app-bg;
   font-family: $app-font;
-
   text-transform: lowercase;
 }
 
@@ -65,16 +65,22 @@ body {
  * IMAGE SELECT BUTTON
  */
 
+h3.instructions {
+  font-family: $app-font;
+  margin: 20px 0 10px 0;
+  text-transform: lowercase;
+  text-align: center;
+}
+
 #image-select-wrap {
   // transition-property: width, height, margin, top, left, padding;
   transition-property: all;
   transition-duration: 1s;
   transition-timing-function: ease;
 
-  display: inline-block;
-
   // Center the image
   text-align: center;
+
 }
 
 #image-select {
@@ -146,7 +152,6 @@ body {
     color: white;
     background: $stripe-inner-block;
     padding: 10px;
-    display: inline-block;
   }
 
   .title {
@@ -155,6 +160,7 @@ body {
 
     span {
       @extend .viewer-inner-text;
+      display: inline-block;
       margin-top: 10px;
     }
   }
@@ -163,7 +169,6 @@ body {
     display: block;
     margin: 0 auto;
 
-    box-sizing: content-box;
     padding: 10px;
   }
 
@@ -185,6 +190,8 @@ body {
 
 ul.algorithm-list {
   display: inline-block;
+  padding: 0;
+  text-align: justify;
 
   li {
     display: inline-block;
