@@ -35,6 +35,9 @@ const animationStyles = (enterDirection, leaveDirection) => {
 
     const animationInSeconds = Notification.animationDuration / 1000;
 
+    // Manually set the html of a style element so we don't need
+    // a stylesheet.
+    // This way, these notifications can be used in any environment.
     return {
         __html: `
         .react-simple-notification.notification-transition-appear,
@@ -95,17 +98,22 @@ class NotificationStack extends Component {
     render () {
         return (
             <div>
+                {
+                    /* By using a style element, an external stylesheet
+                     * isn't required. */
+                }
                 <style dangerouslySetInnerHTML={
                            animationStyles(
                                this.props.enterDirection,
                                this.props.leaveDirection
                            )}
                 />
+
                 <ReactCSSTransitionGroup transitionName={transitionClass}
                                          transitionAppear={true}
                                          transitionAppearTimeout={Notification.animationDuration}
                                          transitionEnterTimeout={Notification.animationDuration}
-                                         transitionLeaveTimeout={Notification.animationDuration * 2.5}>
+                                         transitionLeaveTimeout={Notification.animationDuration}>
                     {
                         this.props.children
                     }
