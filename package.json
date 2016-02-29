@@ -23,7 +23,9 @@
     "react": "^0.14.7",
     "react-addons-css-transition-group": "^0.14.7",
     "react-bootstrap": "^0.28.3",
+    "react-dnd": "^2.1.2",
     "react-dom": "^0.14.7",
+    "react-motion": "^0.4.2",
     "react-router": "^2.0.0",
     "stream-buffers": "^3.0.0",
     "underscore": "^1.8.3"

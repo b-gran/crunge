@@ -50,6 +50,15 @@ body {
 }
 
 /**
+ * TOOLTIPS
+ */
+
+.tooltip .tooltip-inner {
+  font-size: 1em;
+  font-family: $app-font;
+}
+
+/**
  * TOP NAV
  */
 
@@ -70,6 +79,17 @@ h3.instructions {
   margin: 20px 0 10px 0;
   text-transform: lowercase;
   text-align: center;
+
+  i {
+    margin-left: 20px;
+    color: #000;
+    cursor: pointer;
+  }
+
+  i:hover {
+    transition: color 0.3s ease;
+    color: lighten(#000, 40%);
+  }
 }
 
 #image-select-wrap {
@@ -188,27 +208,70 @@ h3.instructions {
  * ALGORITHM LIST
  */
 
+.selectable-white {
+  cursor: pointer;
+  background: #F5F5F5;
+  transition: background-color 0.3s ease;
+}
+
+.selectable-white:hover {
+  // Darken on hover
+  background: darken(#F5F5F5, 30%);
+}
+
 ul.algorithm-list {
   display: inline-block;
   padding: 0;
   text-align: justify;
 
   li {
+    @extend .selectable-white;
     display: inline-block;
 
     padding: 5px;
     margin: 5px;
     border: 1px solid;
     border-radius: 2px;
+  }
+}
 
-    background: #F5F5F5;
-    transition: background-color 0.3s ease;
+.algorithm-editor-wrap {
+  padding: 0 5px;
+}
 
-    cursor: pointer;
+.algorithm-editor {
+  display: table;
+  position: relative;
+  width: 100%;
+
+  .btn-scroll {
+    @extend .selectable-white;
+    border: 1px solid black;
+    font-size: 3em;
+    padding: 0 5px;
   }
 
-  li:hover {
-    // Darken on hover
-    background: darken(#F5F5F5, 30%);
+  .btn-scroll-left {
+    @extend .btn-scroll;
+    top: 0;
+    left: 0;
+  }
+
+  .btn-scroll-right {
+    @extend .btn-scroll;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .middle-line {
+    display: table-cell;
+    width: 100%;
+    vertical-align: middle;
+
+    hr {
+      border: 0;
+      border-top: 1px solid black;
+    }
   }
 }

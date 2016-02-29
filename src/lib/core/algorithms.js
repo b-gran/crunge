@@ -246,3 +246,5 @@ export default {
         param('multiplier', 'Number'),
     ]),
 };
+
+export { Algorithm };

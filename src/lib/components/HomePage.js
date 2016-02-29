@@ -1,15 +1,77 @@
 import _ from 'underscore';
 
-import algorithms from '../core/algorithms';
+import algorithms, { Algorithm } from '../core/algorithms';
 
 import React, { Component, PropTypes } from 'react';
-import { Grid, Row, Col } from 'react-bootstrap';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { Grid, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Motion, spring } from 'react-motion';
 
 import Page from './Page';
 
 import ImageViewer from './ImageViewer';
+
+function arrayBufferToBase64 (buffer) {
+    var binary = '';
+    var bytes = new Uint8Array(buffer);
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
+class AlgorithmSelector extends Component {
+    static displayName = 'AlgorithmSelector';
+
+    static propTypes = {
+        algorithms: PropTypes.objectOf(PropTypes.instanceOf(Algorithm)),
+    };
+
+    constructor (props) {
+        super(props);
+    };
+
+    render () {
+        return (
+            <div>
+                <ul className="algorithm-list">
+                    {
+                        _.map(this.props.algorithms, (__, name) => {
+                            return <AlgorithmSelector.DraggableAlgorithm key={name} name={name}/>
+                        })
+                    }
+
+                </ul>
+                <AlgorithmSelector.AlgorithmEditor />
+            </div>
+        );
+    };
+
+    static DraggableAlgorithm = (props) => (
+        <li className="algorithm">
+            <span>{ props.name }</span>
+        </li>
+    );
+
+    static AlgorithmEditor = (props) => (
+        <div className="algorithm-editor-wrap">
+            <div className="algorithm-editor">
+                <div className="btn-scroll-left">
+                    <i className="fa fa-angle-left" />
+                </div>
+
+                <div className="middle-line">
+                    <hr/>
+                </div>
+
+                <div className="btn-scroll-right">
+                    <i className="fa fa-angle-right" />
+                </div>
+            </div>
+        </div>
+    );
+
+}
 
 class HomePage extends Component {
     static displayName = 'HomePage';
@@ -40,26 +102,19 @@ class HomePage extends Component {
         let imageSelectProps = (this.state.selectedImage)
             // After an image selected, it gets moved to the left
             // side of the page and the controls show up on the right.
-            ? {sm: 6 }
+            ? {sm: 6}
 
             // When an image isn't selected, the image select box
             // sits in the center of the page.
             : {sm: 8, smOffset: 2};
 
         // Show the image preview if an image is selected
-        let viewerProps =
-            (this.state.selectedImage) ?
+        let viewerProps = (this.state.selectedImage) ?
             {
                 imageURI: "data:image/jpeg;base64," + this.state.imageString,
                 imageName: this.state.filename,
             } :
             {};
-
-        let Algorithm = (props) => (
-            <li className="algorithm">
-                <span>{ props.name }</span>
-            </li>
-        );
 
         let animationCSS = (x, opacity) => ({
             transform: `translate3d(${x}px, 0, 0)`,
@@ -67,14 +122,14 @@ class HomePage extends Component {
         });
 
         let algorithmStyle = (this.state.selectedImage) ?
-            {
-                x: spring(0),
-                opacity: spring(1)
-            } :
-            {
-                x: spring(800),
-                opacity: spring(0)
-            };
+        {
+            x: spring(0),
+            opacity: spring(1)
+        } :
+        {
+            x: spring(800),
+            opacity: spring(0)
+        };
 
         // Props to animate the algo list
         let motionProps = {
@@ -90,44 +145,46 @@ class HomePage extends Component {
                 <Grid>
                     <Row>
                         <Col id="image-select-wrap" { ...imageSelectProps }>
-                            <h3 className="instructions">step 1. select an image</h3>
+                            <HomePage.Instruction
+                                text="step 1. select an image"
+                                tooltip='select an image from your computer to corrupt' />
+
                             <ImageViewer onSelectImage={::this.handleSelectFile} { ...viewerProps } />
                         </Col>
                         {
-                            (this.state.selectedImage) ?
+                            // The algo animations are disabled for development
+                            /*(this.state.selectedImage) ?
                                 <Motion { ...motionProps }>
                                     {
-                                        ({x, opacity}) => (
-                                            <Col sm={6} style={animationCSS(x, opacity)}>
-                                                <h3 className="instructions">step 2. add some filters</h3>
-                                                <ul className="algorithm-list">
-                                                    {
-                                                        _.map(algorithms, (__, name) => {
-                                                            return <Algorithm key={name} name={name}/>
-                                                        })
-                                                    }
-                                                </ul>
-                                            </Col>
+                                        ({x, opacity}) => (*/
+                                            <Col sm={6} /*style={animationCSS(x, opacity)}*/>
+                                                <HomePage.Instruction
+                                                    text="step 2. add some filters"
+                                                    tooltip={`drag some filters to the bar
+                                                              below. arrange them in
+                                                              whatever order you'd like`} />
+                                                <AlgorithmSelector algorithms={algorithms}/>
+                                            </Col>/*
                                         )
                                     }
-                                </Motion> :
+                                </Motion> /*:
                                 null // Don't show the algos if an image isn't selected
+                                */
                         }
                     </Row>
                 </Grid>
             </Page>
         );
     };
-}
 
-function arrayBufferToBase64 (buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-};
+    static Instruction = ({ text, tooltip, placement = 'top' }) => (
+        <h3 className="instructions">
+            { text }
+            <OverlayTrigger placement={placement} overlay={<Tooltip>{tooltip}</Tooltip>}>
+                <i className='fa fa-question-circle' />
+            </OverlayTrigger>
+        </h3>
+    );
+}
 
 export default HomePage;
