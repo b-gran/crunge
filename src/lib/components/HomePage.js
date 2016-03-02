@@ -6,9 +6,12 @@ import React, { Component, PropTypes } from 'react';
 import { Grid, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Motion, spring } from 'react-motion';
 
-import Page from './Page';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
+import Page from './Page';
 import ImageViewer from './ImageViewer';
+import AlgorithmSelector from './AlgorithmSelector';
 
 function arrayBufferToBase64 (buffer) {
     var binary = '';
@@ -18,59 +21,6 @@ function arrayBufferToBase64 (buffer) {
         binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
-}
-
-class AlgorithmSelector extends Component {
-    static displayName = 'AlgorithmSelector';
-
-    static propTypes = {
-        algorithms: PropTypes.objectOf(PropTypes.instanceOf(Algorithm)),
-    };
-
-    constructor (props) {
-        super(props);
-    };
-
-    render () {
-        return (
-            <div>
-                <ul className="algorithm-list">
-                    {
-                        _.map(this.props.algorithms, (__, name) => {
-                            return <AlgorithmSelector.DraggableAlgorithm key={name} name={name}/>
-                        })
-                    }
-
-                </ul>
-                <AlgorithmSelector.AlgorithmEditor />
-            </div>
-        );
-    };
-
-    static DraggableAlgorithm = (props) => (
-        <li className="algorithm">
-            <span>{ props.name }</span>
-        </li>
-    );
-
-    static AlgorithmEditor = (props) => (
-        <div className="algorithm-editor-wrap">
-            <div className="algorithm-editor">
-                <div className="btn-scroll-left">
-                    <i className="fa fa-angle-left" />
-                </div>
-
-                <div className="middle-line">
-                    <hr/>
-                </div>
-
-                <div className="btn-scroll-right">
-                    <i className="fa fa-angle-right" />
-                </div>
-            </div>
-        </div>
-    );
-
 }
 
 class HomePage extends Component {
@@ -187,4 +137,5 @@ class HomePage extends Component {
     );
 }
 
-export default HomePage;
+// Wrap HomePage in react-dnd context wrapper to support dnd on children.
+export default DragDropContext(HTML5Backend)(HomePage);

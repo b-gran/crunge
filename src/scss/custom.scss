@@ -235,43 +235,82 @@ ul.algorithm-list {
   }
 }
 
-.algorithm-editor-wrap {
-  padding: 0 5px;
-}
-
-.algorithm-editor {
-  display: table;
+// Wraps the scroll buttons, algos, and line
+.editor-wrap {
   position: relative;
   width: 100%;
-
-  .btn-scroll {
-    @extend .selectable-white;
-    border: 1px solid black;
-    font-size: 3em;
-    padding: 0 5px;
-  }
-
-  .btn-scroll-left {
-    @extend .btn-scroll;
-    top: 0;
-    left: 0;
-  }
-
-  .btn-scroll-right {
-    @extend .btn-scroll;
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
+  padding: 0 5px;
+  display: table;
 
   .middle-line {
-    display: table-cell;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    vertical-align: middle;
+    height: 100%;
+    padding: 0 5px;
+    z-index: -1;
+
+    display: flex;
+    align-items: center;
 
     hr {
       border: 0;
       border-top: 1px solid black;
+      flex-grow: 1;
     }
+  }
+}
+
+$scroll-btn-font-size-multiplier: 3;
+$scroll-btn-width: 0.65em;
+
+// Wraps the scroll buttons and algos
+.algorithm-controls-wrap {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+
+  .btn-scroll-left,
+  .btn-scroll-right {
+    @extend .selectable-white;
+    flex-grow: 0;
+    border: 1px solid black;
+    font-size: (1em * $scroll-btn-font-size-multiplier);
+    width: $scroll-btn-width;
+    padding: 0 5px;
+  }
+}
+
+// Wraps the algos
+.algorithms-wrap {
+  flex-grow: 1;
+
+  // So that flex-grow will work
+  width: 0;
+
+  // Hides the algos outside the viewing area
+  overflow: hidden;
+}
+
+// The algo ul
+.algorithms-wrap .algorithms {
+  // So the scroll buttons can work
+  position: relative;
+
+  height: 100%;
+  display: flex;
+
+  margin: 0;
+  padding: 0;
+
+  // Individual algos
+  li.algorithm {
+    @extend .selectable-white;
+    display: block;
+    margin: 0 7px;
+    padding: 5px;
+    border: 1px solid black;
   }
 }
