@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import update from 'react-addons-update';
 import _ from 'lodash';
 
 import algorithms, { Algorithm } from '../core/algorithms';
@@ -32,10 +33,10 @@ class AlgorithmBox extends Component {
     };
 
     render () {
-        const { name, connectDragSource, isDragging } = this.props;
+        const { name, children, connectDragSource, isDragging } = this.props;
         return connectDragSource(
             <li className="algorithm">
-                <span>{ name }</span>
+                { children || name }
             </li>
         );
     };
@@ -50,6 +51,9 @@ const editorTarget = {
     },
 };
 
+const SCROLL_LEFT = 'left',
+    SCROLL_RIGHT = 'right';
+
 class AlgorithmEditor extends Component {
     static displayName = 'AlgorithmEditor';
 
@@ -60,32 +64,94 @@ class AlgorithmEditor extends Component {
         onDropAlgorithm: PropTypes.func.isRequired,
     };
 
-    render() {
+    state = {
+        // x-axis position of the slider
+        x: 0,
+
+        // id of the scroll interval.
+        // 0 if no interval.
+        scroll: {
+            left: 0,
+            right: 0,
+        },
+    };
+
+    beginScroll (direction) {
+        const multiplier =
+            (direction === SCROLL_RIGHT)
+                ? 1
+                : -1;
+
+        const id = window.setInterval(() => {
+            console.log('scrolling + ' + direction);
+            this.setState({
+                x: this.state.x + 10 * multiplier,
+            });
+        }, 100);
+
+        console.log('starting sscroll');
+
+        this.setState(update(this.state, {
+            scroll: {
+                [direction]: {
+                    $set: id
+                }
+            }
+        }));
+    };
+
+    endScroll (direction) {
+        console.log('ending scroll');
+        if (this.state.id) {
+            window.clearInterval(this.state.id);
+            this.setState(
+                update(this.state, {
+                        scroll: {
+                            [direction]: {
+                                $set: 0
+                            }
+                        }
+                    }
+                ));
+        }
+    };
+
+    /*
+     *  onClick onContextMenu onDoubleClick onDrag onDragEnd
+     *  onDragEnter onDragExit onDragLeave onDragOver
+     *  onDragStart onDrop onMouseDown onMouseEnter
+     *  onMouseLeave onMouseMove onMouseOut onMouseOver
+     *  onMouseUp
+     */
+
+    render () {
         return (
             <div className="editor-wrap">
                 <div className="algorithm-controls-wrap">
-                    <div className="btn-scroll-left">
-                        <i className="fa fa-angle-left" />
+                    <div className="btn-scroll-left"
+                         onMouseDown={this.beginScroll.bind(this, SCROLL_LEFT)}
+                         onMouseUp={this.endScroll.bind(this, SCROLL_LEFT)}
+                         onMouseLeave={this.endScroll.bind(this, SCROLL_LEFT)}>
+                        <i className="fa fa-angle-left"/>
                     </div>
 
                     <div className="algorithms-wrap">
                         <ul className="algorithms">
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
-                            <li className="algorithm">TEST</li>
+                            {
+                                _.times(15, idx => (
+                                    <AlgorithmBox key={idx} className="algorithm">
+                                        { `TestAlgo${idx}` }
+                                    </AlgorithmBox>
+                                ))
+                            }
                         </ul>
                     </div>
 
-                    <div className="btn-scroll-right">
-                        <i className="fa fa-angle-right" />
+                    <div className="btn-scroll-right"
+                         onMouseDown={this.beginScroll.bind(this, SCROLL_RIGHT)}
+                         onMouseUp={this.endScroll.bind(this, SCROLL_RIGHT)}
+                         onMouseLeave={this.endScroll.bind(this, SCROLL_RIGHT)}>
+                        <i className="fa fa-angle-right"/>
                     </div>
                 </div>
 
@@ -94,6 +160,78 @@ class AlgorithmEditor extends Component {
                 </div>
             </div>
         );
+    };
+}
+
+class ClickAndHoldable extends Component {
+    static displayName = 'ClickAndHoldable';
+
+    static propTypes = {
+        // How often the hold event fires
+        holdEventFrequency: PropTypes.number,
+
+        // Handlers for hold and click events
+        onClick: PropTypes.func,
+        onHold: PropTypes.func,
+    };
+
+    static defaultProps = {
+        ...Component.defaultProps,
+
+        holdEventFrequency: 250,
+        onClick: () => undefined,
+        onHold: () => undefined,
+    };
+
+    state = {
+        isMouseDown: false,
+        timer: undefined,
+    };
+
+    // Set up hold timer before component mounts.
+    componentWillMount () {
+        const timer = window.setInterval(() => {
+            this.props.onHold();
+        }, this.props.holdEventFrequency);
+
+        return this.setState({
+            timer
+        });
+    };
+
+    // Tear down timer when component is unmounting
+    componentWillUnmount () {
+        if (!this.state.timer) return;
+
+        return window.clearInterval(this.state.timer);
+    };
+
+    /*
+     *  onClick onContextMenu onDoubleClick onDrag onDragEnd
+     *  onDragEnter onDragExit onDragLeave onDragOver
+     *  onDragStart onDrop onMouseDown onMouseEnter
+     *  onMouseLeave onMouseMove onMouseOut onMouseOver
+     *  onMouseUp
+     */
+
+    handleMouseDown () {
+        return this.setState({
+            isMouseDown: true,
+        });
+    };
+
+    handleMouseUp () {
+        return this.setState({
+            isMouseDown: false,
+        });
+    };
+
+    render () {
+        return (
+            <div onMouseDown={::this.handleMouseDown} onMouseUp={::this.handleMouseUp}>
+                { this.props.children }
+            </div>
+        )
     };
 }
 
@@ -108,9 +246,8 @@ class AlgorithmSelector extends Component {
         super(props);
     };
 
-    handleDropAlgorithm (
-        dragIndex, // Index of the algo being dragged
-        hoverIndex // Index the algo has been dragged into
+    handleDropAlgorithm (dragIndex, // Index of the algo being dragged
+                         hoverIndex // Index the algo has been dragged into
     ) {
         console.log(dragIndex, hoverIndex);
     }
@@ -122,10 +259,10 @@ class AlgorithmSelector extends Component {
                     {
                         _(this.props.algorithms)
                             .chain()
-                            .map((__, name) => ({ name }))
+                            .map((__, name) => ({name}))
                             .map(({ name }, index) => {
                                 return <AlgorithmBox key={name} name={name} index={index}
-                                                     onDrop={::this.handleDropAlgorithm} />
+                                                     onDrop={::this.handleDropAlgorithm}/>
                             })
                             .value()
                     }

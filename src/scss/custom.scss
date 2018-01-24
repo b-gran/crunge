@@ -219,6 +219,7 @@ h3.instructions {
   background: darken(#F5F5F5, 30%);
 }
 
+/*
 ul.algorithm-list {
   display: inline-block;
   padding: 0;
@@ -230,6 +231,25 @@ ul.algorithm-list {
 
     padding: 5px;
     margin: 5px;
+    border: 1px solid;
+    border-radius: 2px;
+  }
+}
+*/
+
+ul.algorithm-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  padding: 0;
+
+  li {
+    @extend .selectable-white;
+    display: inline-block;
+
+    padding: 5px;
+    margin: 3px 0;
     border: 1px solid;
     border-radius: 2px;
   }
