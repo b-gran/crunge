@@ -28,11 +28,11 @@ gulp production
 ### running
 ```
 # from the command line
-babel-node -- src/lib/cli/cli.js -i 'yourimage.jpg' -o 'corruptedimg.jpg' padding sinusoidal_weird_cos
+babel-node -- src/lib/cli/cli.js -i 'yourimage.jpg' -o 'corruptedimg.jpg' padding, sinusoidal_weird_cos
 
 # for help, 
 babel-node -- src/lib/cli/cli.js --help
 
 # to corrupt many images at once
-babel-node -- src/lib/cli/bulk.js -i 'image-glob/*.jpg' -o 'an-output-folder/' chunks padding sinusoidal_weird_sin
+babel-node -- src/lib/cli/bulk.js -i 'image-glob/*.jpg' -o 'an-output-folder/' chunks, padding, sinusoidal_weird_sin
 ```
