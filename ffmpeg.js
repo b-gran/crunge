@@ -31,6 +31,7 @@ function toFrames (videoPath) {
     fs.mkdirSync(frameDirectory)
   } catch (err) {
     debug.warn('Frame directory already exists.')
+    return Promise.resolve(frameDirectory)
   }
 
   return new Promise((resolve, reject) => {
