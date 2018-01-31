@@ -6,19 +6,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const chalk = require('chalk')
 const R = require('ramda')
 
-const toFixedLengthString = R.curry((length, n) => {
-  const string = String(n)
-  return string.length < length
-    ? `${R.repeat('0', length - string.length)}${string}`
-    : string
-})
-
-function debug (...msg) {
-  console.log(chalk.blue(timeFormat(new Date)), ...msg)
-}
-debug.color = color => (...msg) => console.log(color(timeFormat(new Date)), ...R.map(color, msg))
-debug.warn = debug.color(chalk.yellow)
-debug.error = debug.color(chalk.red)
+const { debug } = require('./lib')
 
 function toFrames (videoPath) {
   const absolutePath = path.resolve(videoPath)
@@ -58,12 +46,4 @@ function getFrameFormatString (videoPath) {
 function getFrameDirectory (videoPath) {
   const parsedPath = path.parse(videoPath)
   return `${parsedPath.dir}/${parsedPath.name}__frames/`
-}
-
-function timeFormat (date) {
-  return (
-    `[${[date.getHours(), date.getMinutes(), date.getSeconds()]
-      .map(toFixedLengthString(2))
-      .join(':')}]`
-  )
 }
